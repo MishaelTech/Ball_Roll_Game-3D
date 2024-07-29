@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(xInput * speed, 0, yInput * speed);
     }
 
-    private void RestartGame()
+    public void RestartGame()
     {
         SceneManager.LoadScene("Game");
     }
