@@ -8,8 +8,6 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody rb;
 
-    float xInput;
-    float yInput;
     float timer = 0f;
 
     bool gameStarted = false;
@@ -50,10 +48,9 @@ public class PlayerController : MonoBehaviour
         scoreText.text = $"Score: {playerScore} / {highScore}";
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(transform.position.y < -0f)
+        if (transform.position.y < -0f)
         {
             SceneManager.LoadScene("Game");
         }
@@ -61,7 +58,7 @@ public class PlayerController : MonoBehaviour
         if (gameStarted)
         {
             timer += Time.deltaTime;
-            timerText.text = $"Time: {timer:F2}"; // Display the timer in seconds with 2 decimal places
+            timerText.text = $"Time: {30 - timer:F2}";
 
             if (timer >= 30f)
             {
@@ -87,10 +84,11 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        xInput = Input.GetAxis("Horizontal");
+        /*xInput = Input.GetAxis("Horizontal");
         yInput = Input.GetAxis("Vertical");
 
-        rb.AddForce(xInput * speed, 0, yInput * speed);
+        rb.AddForce(xInput * speed, 0, yInput * speed);*/
+        HandleInput();
     }
 
     public void RestartGame()
@@ -100,21 +98,48 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Coin")
+        if (other.gameObject.tag == "Coin")
         {
             other.gameObject.SetActive(false);
 
             score++;
             addScore(1);
 
-            if(score >= winScore)
+            if (score >= winScore)
             {
                 //gamewin
                 winText.SetActive(true);
-                gameStarted = false; 
+                gameStarted = false;
                 Invoke(nameof(RestartGame), 5f);
             }
         }
+    }
+
+    private void HandleInput()
+    {
+        float xInput = 0;
+        float yInput = 0;
+
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            Vector2 touchPosition = touch.position;
+
+            // Calculate the normalized touch position
+            float normalizedX = (touchPosition.x / Screen.width) * 2 - 1;
+            float normalizedY = (touchPosition.y / Screen.height) * 2 - 1;
+
+            // Use the normalized touch position as input
+            xInput = normalizedX;
+            yInput = normalizedY;
+        }
+        else
+        {
+            xInput = Input.GetAxis("Horizontal");
+            yInput = Input.GetAxis("Vertical");
+        }
+
+        rb.AddForce(new Vector3(xInput, 0, yInput) * speed);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -125,7 +150,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Call this method to start the timer when the game begins
     public void StartGame()
     {
         timer = 0f;
